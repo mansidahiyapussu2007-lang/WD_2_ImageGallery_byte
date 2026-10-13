@@ -1,0 +1,559 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pixel Gallery</title>
+
+<style>
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg: #f7f8fc;
+    --text: #1c2030;
+    --muted: #777d91;
+    --accent: #6c63ff;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+/* Header */
+header {
+    padding: 32px 6% 20px;
+    text-align: center;
+}
+
+.logo {
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.logo span {
+    color: var(--accent);
+}
+
+header p {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 0.98rem;
+}
+
+/* Gallery */
+.gallery-container {
+    width: min(1250px, 90%);
+    margin: 25px auto 70px;
+}
+
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.gallery-item {
+    position: relative;
+    overflow: hidden;
+    border: none;
+    border-radius: 17px;
+    background: #e6e8f0;
+    aspect-ratio: 4 / 3;
+    cursor: pointer;
+    padding: 0;
+    box-shadow: 0 5px 20px rgba(20, 25, 50, 0.06);
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    transition: transform 0.45s ease;
+}
+
+.gallery-item:hover img,
+.gallery-item:focus-visible img {
+    transform: scale(1.07);
+}
+
+.gallery-item:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 4px;
+}
+
+.image-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    padding: 22px;
+    text-align: left;
+    color: white;
+    background: linear-gradient(
+        transparent 45%,
+        rgba(0, 0, 0, 0.65)
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.gallery-item:hover .image-overlay,
+.gallery-item:focus-visible .image-overlay {
+    opacity: 1;
+}
+
+.image-overlay h3 {
+    font-size: 1.05rem;
+}
+
+/* Lightbox */
+.lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 70px 75px 35px;
+    background: rgba(10, 12, 22, 0.94);
+    backdrop-filter: blur(12px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.lightbox.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.lightbox-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    gap: 17px;
+}
+
+.lightbox-image {
+    display: block;
+    max-width: 100%;
+    max-height: calc(100% - 65px);
+    object-fit: contain;
+    border-radius: 9px;
+    box-shadow: 0 15px 60px rgba(0, 0, 0, 0.3);
+    user-select: none;
+}
+
+.caption {
+    color: #fff;
+    text-align: center;
+    font-size: 0.95rem;
+}
+
+.counter {
+    color: #c6c7d2;
+    font-size: 0.82rem;
+    margin-top: 5px;
+}
+
+/* Lightbox controls */
+.control {
+    position: absolute;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.control:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.06);
+}
+
+.close-btn {
+    top: 24px;
+    right: 28px;
+    width: 46px;
+    height: 46px;
+    font-size: 27px;
+}
+
+.prev-btn,
+.next-btn {
+    top: 50%;
+    width: 48px;
+    height: 48px;
+    font-size: 30px;
+    transform: translateY(-50%);
+}
+
+.prev-btn:hover,
+.next-btn:hover {
+    transform: translateY(-50%) scale(1.06);
+}
+
+.prev-btn {
+    left: 20px;
+}
+
+.next-btn {
+    right: 20px;
+}
+
+footer {
+    text-align: center;
+    color: var(--muted);
+    padding: 0 20px 28px;
+    font-size: 0.88rem;
+}
+
+/* Tablet */
+@media (max-width: 850px) {
+    .gallery {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 17px;
+    }
+
+    .lightbox {
+        padding: 75px 65px 30px;
+    }
+
+    .prev-btn {
+        left: 8px;
+    }
+
+    .next-btn {
+        right: 8px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 520px) {
+    header {
+        padding-top: 28px;
+    }
+
+    .logo {
+        font-size: 1.6rem;
+    }
+
+    .gallery-container {
+        width: 92%;
+        margin-top: 20px;
+    }
+
+    .gallery {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .gallery-item {
+        aspect-ratio: 4 / 3;
+        border-radius: 13px;
+    }
+
+    .image-overlay {
+        opacity: 1;
+        padding: 16px;
+    }
+
+    .lightbox {
+        padding: 85px 12px 25px;
+    }
+
+    .close-btn {
+        top: 18px;
+        right: 16px;
+        width: 42px;
+        height: 42px;
+    }
+
+    .prev-btn,
+    .next-btn {
+        top: auto;
+        bottom: 55px;
+        width: 42px;
+        height: 42px;
+        transform: none;
+    }
+
+    .prev-btn:hover,
+    .next-btn:hover {
+        transform: scale(1.06);
+    }
+
+    .prev-btn {
+        left: 15px;
+    }
+
+    .next-btn {
+        right: 15px;
+    }
+
+    .lightbox-image {
+        max-height: calc(100% - 80px);
+    }
+
+    .caption {
+        font-size: 0.85rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        transition: none !important;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">Pixel<span>Gallery.</span></div>
+    <p>A little collection of beautiful moments.</p>
+</header>
+
+<main class="gallery-container">
+    <div class="gallery" id="gallery" aria-label="Image gallery">
+
+        <button class="gallery-item"
+            data-title="Mountain Escape"
+            aria-label="Open Mountain Escape image">
+            <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=900&q=85"
+                 alt="Majestic mountains beneath the sky">
+            <span class="image-overlay"><h3>Mountain Escape</h3></span>
+        </button>
+
+        <button class="gallery-item"
+            data-title="Ocean Dreams"
+            aria-label="Open Ocean Dreams image">
+            <img src="https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=900&q=85"
+                 alt="Ocean waves rolling onto the shore">
+            <span class="image-overlay"><h3>Ocean Dreams</h3></span>
+        </button>
+
+        <button class="gallery-item"
+            data-title="Forest Trails"
+            aria-label="Open Forest Trails image">
+            <img src="https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=900&q=85"
+                 alt="Sunlight passing through a green forest">
+            <span class="image-overlay"><h3>Forest Trails</h3></span>
+        </button>
+
+        <button class="gallery-item"
+            data-title="City Lights"
+            aria-label="Open City Lights image">
+            <img src="https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=900&q=85"
+                 alt="A city illuminated at night">
+            <span class="image-overlay"><h3>City Lights</h3></span>
+        </button>
+
+        <button class="gallery-item"
+            data-title="Desert Serenity"
+            aria-label="Open Desert Serenity image">
+            <img src="https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&fit=crop&w=900&q=85"
+                 alt="Golden desert sand dunes">
+            <span class="image-overlay"><h3>Desert Serenity</h3></span>
+        </button>
+
+        <button class="gallery-item"
+            data-title="Wild Beauty"
+            aria-label="Open Wild Beauty image">
+            <img src="https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=900&q=85"
+                 alt="Wildlife in a natural landscape">
+            <span class="image-overlay"><h3>Wild Beauty</h3></span>
+        </button>
+
+        <button class="gallery-item"
+            data-title="Morning Coffee"
+            aria-label="Open Morning Coffee image">
+            <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=900&q=85"
+                 alt="A warm cup of coffee">
+            <span class="image-overlay"><h3>Morning Coffee</h3></span>
+        </button>
+
+        <button class="gallery-item"
+            data-title="Floral Dreams"
+            aria-label="Open Floral Dreams image">
+            <img src="https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=900&q=85"
+                 alt="Colorful flowers in bloom">
+            <span class="image-overlay"><h3>Floral Dreams</h3></span>
+        </button>
+
+        <button class="gallery-item"
+            data-title="Golden Sunset"
+            aria-label="Open Golden Sunset image">
+            <img src="https://images.unsplash.com/photo-1472120435266-53107fd0c44a?auto=format&fit=crop&w=900&q=85"
+                 alt="Warm golden sunlight over a landscape">
+            <span class="image-overlay"><h3>Golden Sunset</h3></span>
+        </button>
+
+    </div>
+</main>
+
+<!-- Lightbox popup -->
+<div class="lightbox" id="lightbox"
+     role="dialog"
+     aria-modal="true"
+     aria-label="Image viewer"
+     aria-hidden="true">
+
+    <button class="control close-btn" id="closeBtn"
+            aria-label="Close image viewer">×</button>
+
+    <button class="control prev-btn" id="prevBtn"
+            aria-label="Previous image">‹</button>
+
+    <div class="lightbox-content">
+        <img class="lightbox-image" id="lightboxImage" src=""
+             alt="">
+        <div>
+            <p class="caption" id="caption"></p>
+            <p class="counter" id="counter"></p>
+        </div>
+    </div>
+
+    <button class="control next-btn" id="nextBtn"
+            aria-label="Next image">›</button>
+</div>
+
+<footer>
+    Made with ♥ for photography lovers.
+</footer>
+
+<script>
+const galleryItems = [...document.querySelectorAll(".gallery-item")];
+const lightbox = document.getElementById("lightbox");
+const lightboxImage = document.getElementById("lightboxImage");
+const caption = document.getElementById("caption");
+const counter = document.getElementById("counter");
+const closeBtn = document.getElementById("closeBtn");
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+
+let currentIndex = 0;
+let lastFocusedElement = null;
+
+function openLightbox(index) {
+    currentIndex = index;
+    lastFocusedElement = document.activeElement;
+
+    lightbox.classList.add("active");
+    lightbox.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+
+    showImage();
+    closeBtn.focus();
+}
+
+function showImage() {
+    const item = galleryItems[currentIndex];
+    const thumbnail = item.querySelector("img");
+
+    // Use the full-resolution image URL where available.
+    const fullImage = new URL(thumbnail.src);
+    fullImage.searchParams.set("w", "1800");
+    fullImage.searchParams.set("q", "90");
+
+    lightboxImage.src = fullImage.href;
+    lightboxImage.alt = thumbnail.alt;
+    caption.textContent = item.dataset.title || thumbnail.alt;
+    counter.textContent =
+        `${currentIndex + 1} / ${galleryItems.length}`;
+
+    prevBtn.disabled = galleryItems.length < 2;
+    nextBtn.disabled = galleryItems.length < 2;
+}
+
+function closeLightbox() {
+    lightbox.classList.remove("active");
+    lightbox.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+
+    lightboxImage.src = "";
+
+    if (lastFocusedElement) {
+        lastFocusedElement.focus();
+    }
+}
+
+function showNext() {
+    currentIndex = (currentIndex + 1) % galleryItems.length;
+    showImage();
+}
+
+function showPrevious() {
+    currentIndex =
+        (currentIndex - 1 + galleryItems.length) %
+        galleryItems.length;
+
+    showImage();
+}
+
+// Open clicked image.
+galleryItems.forEach((item, index) => {
+    item.addEventListener("click", () => openLightbox(index));
+});
+
+// Navigation buttons.
+closeBtn.addEventListener("click", closeLightbox);
+nextBtn.addEventListener("click", showNext);
+prevBtn.addEventListener("click", showPrevious);
+
+// Close when clicking the dark background.
+lightbox.addEventListener("click", (event) => {
+    if (event.target === lightbox) {
+        closeLightbox();
+    }
+});
+
+// Keyboard controls.
+document.addEventListener("keydown", (event) => {
+    if (!lightbox.classList.contains("active")) return;
+
+    if (event.key === "Escape") closeLightbox();
+    if (event.key === "ArrowRight") showNext();
+    if (event.key === "ArrowLeft") showPrevious();
+});
+
+// Basic focus containment for keyboard users.
+lightbox.addEventListener("keydown", (event) => {
+    if (event.key !== "Tab") return;
+
+    const controls = [closeBtn, prevBtn, nextBtn];
+    const first = controls[0];
+    const last = controls[controls.length - 1];
+
+    if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+    }
+});
+</script>
+
+</body>
+</html>
